@@ -2,10 +2,9 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Users API - Negative Tests", () => {
 
- 
   // 1. INVALID USER ID
 
-  test.only("should return 404 for invalid user ID", async ({ request }) => {
+  test("should return 404 for invalid user ID", async ({ request }) => {
 
     const invalidUserId = 999999;
 
@@ -18,7 +17,7 @@ test.describe("Users API - Negative Tests", () => {
 
   // 2. INVALID USER DATA
 
-  test("should reject invalid user data", async ({ request }) => {
+  test("should accept invalid user data in JSONPlaceholder", async ({ request }) => {
 
     const payload = {
       name: "",
@@ -30,18 +29,24 @@ test.describe("Users API - Negative Tests", () => {
       data: payload
     });
 
-    expect(response.status()).toBe(400);
+    expect(response.status()).toBe(201);
+
+    const body = await response.json();
+
+    expect(body.name).toBe(payload.name);
+    expect(body.username).toBe(payload.username);
+    expect(body.email).toBe(payload.email);
 
   });
 
 
   // 3. MISSING REQUEST BODY
 
-  test("should handle missing request body", async ({ request }) => {
+  test("should accept missing request body in JSONPlaceholder", async ({ request }) => {
 
     const response = await request.post("/users");
 
-    expect(response.status()).toBe(400);
+    expect(response.status()).toBe(201);
 
   });
 
