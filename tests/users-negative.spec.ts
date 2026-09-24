@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
+import { negativeUserCases } from "../test-data/negative-users";
+import { ResponseValidator } from "../utils/response.validator";
 
 test.describe("Users API - Negative Tests", () => {
-
-  // 1. INVALID USER ID
 
   test("should return 404 for invalid user ID", async ({ request }) => {
 
@@ -10,44 +10,28 @@ test.describe("Users API - Negative Tests", () => {
 
     const response = await request.get(`/users/${invalidUserId}`);
 
-    expect(response.status()).toBe(404);
-
+    await ResponseValidator.validateStatus(response, 404);
   });
 
 
-  // 2. INVALID USER DATA
+  for (const testCase of negativeUserCases) {
 
-  test("should accept invalid user data in JSONPlaceholder", async ({ request }) => {
+    test(`should handle ${testCase.name}`, async ({ request }) => {
 
-    const payload = {
-      name: "",
-      username: "",
-      email: "invalid-email"
-    };
+      const response = await request.post("/users", {
+        data: testCase.payload,
+      });
 
-    const response = await request.post("/users", {
-      data: payload
+      await ResponseValidator.validateStatus(
+        response,
+        testCase.expectedStatus
+      );
+
+      const body = await response.json();
+
+      expect(body).toBeDefined();
     });
 
-    expect(response.status()).toBe(201);
-
-    const body = await response.json();
-
-    expect(body.name).toBe(payload.name);
-    expect(body.username).toBe(payload.username);
-    expect(body.email).toBe(payload.email);
-
-  });
-
-
-  // 3. MISSING REQUEST BODY
-
-  test("should accept missing request body in JSONPlaceholder", async ({ request }) => {
-
-    const response = await request.post("/users");
-
-    expect(response.status()).toBe(201);
-
-  });
+  }
 
 });

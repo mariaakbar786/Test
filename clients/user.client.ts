@@ -1,15 +1,16 @@
-
 import { APIRequestContext } from "@playwright/test";
 import { Logger } from "../utils/logger";
+import { ENDPOINTS } from "../constants/endpoints";
+import { User } from "../models/user.model";
 
 export class UserClient {
 
   constructor(private request: APIRequestContext) {}
 
   async getUsers() {
-    Logger.request("GET", "/users");
+    Logger.request("GET", ENDPOINTS.USERS);
 
-    const response = await this.request.get("/users");
+    const response = await this.request.get(ENDPOINTS.USERS);
 
     Logger.response(response.status());
 
@@ -17,19 +18,21 @@ export class UserClient {
   }
 
   async getUserById(userId: number) {
-    Logger.request("GET", `/users/${userId}`);
+    const endpoint = ENDPOINTS.USER_BY_ID(userId);
 
-    const response = await this.request.get(`/users/${userId}`);
+    Logger.request("GET", endpoint);
+
+    const response = await this.request.get(endpoint);
 
     Logger.response(response.status());
 
     return response;
   }
 
-  async createUser(payload: object) {
-    Logger.request("POST", "/users");
+  async createUser(payload: User) {
+    Logger.request("POST", ENDPOINTS.USERS);
 
-    const response = await this.request.post("/users", {
+    const response = await this.request.post(ENDPOINTS.USERS, {
       data: payload
     });
 
@@ -38,10 +41,12 @@ export class UserClient {
     return response;
   }
 
-  async updateUser(userId: number, payload: object) {
-    Logger.request("PUT", `/users/${userId}`);
+  async updateUser(userId: number, payload: User) {
+    const endpoint = ENDPOINTS.USER_BY_ID(userId);
 
-    const response = await this.request.put(`/users/${userId}`, {
+    Logger.request("PUT", endpoint);
+
+    const response = await this.request.put(endpoint, {
       data: payload
     });
 
@@ -50,10 +55,12 @@ export class UserClient {
     return response;
   }
 
-  async patchUser(userId: number, payload: object) {
-    Logger.request("PATCH", `/users/${userId}`);
+  async patchUser(userId: number, payload: Partial<User>) {
+    const endpoint = ENDPOINTS.USER_BY_ID(userId);
 
-    const response = await this.request.patch(`/users/${userId}`, {
+    Logger.request("PATCH", endpoint);
+
+    const response = await this.request.patch(endpoint, {
       data: payload
     });
 
@@ -63,9 +70,11 @@ export class UserClient {
   }
 
   async deleteUser(userId: number) {
-    Logger.request("DELETE", `/users/${userId}`);
+    const endpoint = ENDPOINTS.USER_BY_ID(userId);
 
-    const response = await this.request.delete(`/users/${userId}`);
+    Logger.request("DELETE", endpoint);
+
+    const response = await this.request.delete(endpoint);
 
     Logger.response(response.status());
 
@@ -73,4 +82,3 @@ export class UserClient {
   }
 
 }
-

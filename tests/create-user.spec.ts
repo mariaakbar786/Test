@@ -1,29 +1,49 @@
-
 import { expect } from "@playwright/test";
 import { test } from "../fixtures/api.fixture";
-import { validUser } from "../test-data/users";
-import Ajv from "ajv";
+import { createUser } from "../test-data/users";
+import { ResponseValidator } from "../utils/response.validator";
 import { userSchema } from "../schemas/user.schema";
 
-const ajv = new Ajv();
-const validateUser = ajv.compile(userSchema);
+const users = [
+  createUser({
+    name: "Alice Brown",
+    username: "alicebrown",
+    email: "alice@example.com",
+  }),
+
+  createUser({
+    name: "Bob Smith",
+    username: "bobsmith",
+    email: "bob@example.com",
+  }),
+
+  createUser({
+    name: "Charlie Davis",
+    username: "charliedavis",
+    email: "charlie@example.com",
+  }),
+];
 
 test.describe("POST Users API", () => {
-  test("should create a new user", async ({ userClient }) => {
-    const response = await userClient.createUser(validUser);
 
-    expect(response.status()).toBe(201);
+  for (const user of users) {
 
-    const body = await response.json();
+    test(`should create user: ${user.username}`, async ({ userClient }) => {
 
-    expect(body).toBeDefined();
+      const response = await userClient.createUser(user);
 
-    expect(validateUser(body)).toBe(true);
+      await ResponseValidator.validateStatus(response, 201);
 
-    expect(body.name).toBe(validUser.name);
-    expect(body.username).toBe(validUser.username);
-    expect(body.email).toBe(validUser.email);
+      const body = await ResponseValidator.validateJson(response);
 
-    expect(body.id).toBeDefined();
-  });
+      await ResponseValidator.validateSchema(body, userSchema);
+
+      expect(body.name).toBe(user.name);
+      expect(body.username).toBe(user.username);
+      expect(body.email).toBe(user.email);
+      expect(body.id).toBeDefined();
+    });
+
+  }
+
 });

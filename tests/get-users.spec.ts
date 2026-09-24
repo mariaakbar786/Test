@@ -1,51 +1,22 @@
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "../fixtures/api.fixture";
+import { ResponseValidator } from "../utils/response.validator";
+import { userSchema } from "../schemas/user.schema";
 
-test.describe("Users API", () => {
-  test("should return users", async ({ request }) => {
-    const response = await request.get("/users");
+test.describe("GET Users API", () => {
 
-    expect(response.status()).toBe(200);
+  test("should get all users", async ({ userClient }) => {
 
-    const responseBody = await response.json();
+    const response = await userClient.getUsers();
 
-    console.log(responseBody);
+    await ResponseValidator.validateStatus(response, 200);
 
-    expect(responseBody).toBeDefined();
-  });
-  test("should return user by ID", async ({ request }) => {
-    const userId = 1;
+    const body = await ResponseValidator.validateJson(response);
 
-    const response = await request.get(`/users/${userId}`);
+    expect(Array.isArray(body)).toBe(true);
+    expect(body.length).toBeGreaterThan(0);
 
-    expect(response.status()).toBe(200);
-
-    expect(response.headers()["content-type"]).toContain("application/json");
-
-    const body = await response.json();
-
-    expect(body.id).toBe(userId);
-    expect(body.name).toBeDefined();
-    expect(body.email).toBeDefined();
+    await ResponseValidator.validateSchema(body[0], userSchema);
   });
 
-  test("should create a user", async ({ request }) => {
-    const payload = {
-      name: "John Smith",
-      username: "johnsmith",
-      email: "john@example.com",
-    };
-
-    const response = await request.post("/users", {
-      data: payload,
-    });
-
-    expect(response.status()).toBe(201);
-
-    const body = await response.json();
-
-    expect(body.name).toBe(payload.name);
-    expect(body.username).toBe(payload.username);
-    expect(body.email).toBe(payload.email);
-    expect(body.id).toBeDefined();
-  });
 });

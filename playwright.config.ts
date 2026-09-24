@@ -1,4 +1,3 @@
-
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
@@ -15,10 +14,17 @@ export default defineConfig({
 
   workers: process.env.CI ? 1 : undefined,
 
+  // Maximum time allowed for one test
+  timeout: 30_000,
+
   reporter: [['html', { open: 'never' }]],
 
   use: {
     baseURL: process.env.BASE_URL,
+
+    // Maximum time for an individual API/browser action
+    actionTimeout: 10_000,
+
     trace: 'on-first-retry',
   },
 
@@ -39,4 +45,3 @@ export default defineConfig({
     },
   ],
 });
-

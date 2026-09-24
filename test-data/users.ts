@@ -5,3 +5,12 @@ export const validUser: User = {
   username: "johnsmith",
   email: "john@example.com",
 };
+
+export function createUser(overrides: Partial<User> = {}): User {
+  return {
+    name: "John Smith",
+    username: "johnsmith",
+    email: "john@example.com",
+    ...overrides,
+  };
+}
